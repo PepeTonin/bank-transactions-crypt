@@ -4,11 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from db.service import initDb
 
-from schemas.requests import GetPublicKey, SignedTransaction, InitSession, LoginRequest
+from schemas.requests import GetPublicKey, SignedTransaction, InitSession, AuthRequest
 
 from utils.rsa import storeUserPublicKeyPem, storeSessionPublicKeyPem
 from utils.aes import useDecryptAes
-from utils.session import getSessionKey, storeSessionKey, loadSessionKey
+from utils.session import getSessionKey, loadSessionKey
 from utils.transaction import executeTransaction
 
 app = FastAPI()
@@ -60,12 +60,25 @@ def doTransaction(request: SignedTransaction):
 
 
 @app.post("/login")
-def doLogin(request: LoginRequest):
+def doLogin(request: AuthRequest):
     data = request.data
     iv = request.iv
     sessionId = request.sessionId
     sessionKey = loadSessionKey(sessionId)
     decryptedData = useDecryptAes(data, iv, sessionKey)
+
+    # decryptedData = payload json com os dados do usuario para tentativa de login
+
+    # buscar o usuario no banco -> trazer email e senha
+
+    # fazer a hash na senha que o usuario deu de entrada
+
+    # verificar se as senhas batem (acho que tem função pronta pra isso)
+
+    # recusar ou autorizar o login
+
+    # caso autorizado -> retornar o usuario completo
+
     return JSONResponse(
         content={
             "name": "teste",
@@ -78,5 +91,31 @@ def doLogin(request: LoginRequest):
 
 
 @app.post("/signup")
-def doSignup():
-    return JSONResponse(content={"message": "signup"}, status_code=200)
+def doSignup(request: AuthRequest):
+    data = request.data
+    iv = request.iv
+    sessionId = request.sessionId
+    sessionKey = loadSessionKey(sessionId)
+    decryptedData = useDecryptAes(data, iv, sessionKey)
+
+    # decryptedData = payload json com os dados do usuario criado 
+
+    # organizar os dados de entrada do usuario
+
+    # aplicar hash argon2 na senha do usuário
+
+    # armazenar tudo no banco
+
+    # autorizar a entrada do usuario
+
+    # retonar o usuario completo
+
+    return JSONResponse(
+        content={
+            "name": "teste",
+            "cpf": "12345678901",
+            "email": "email@email.com",
+            "balance": 0,
+        },
+        status_code=200,
+    )

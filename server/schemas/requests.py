@@ -16,7 +16,7 @@ class SignedTransaction(BaseModel):
     sign: str
 
 
-class LoginRequest(BaseModel):
+class AuthRequest(BaseModel):
     data: str
     iv: str
     sessionId: str

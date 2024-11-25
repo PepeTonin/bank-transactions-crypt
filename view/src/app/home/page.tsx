@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import {
@@ -14,7 +14,10 @@ import {
 import FazerTransacao from "@/templates/FazerTransacao";
 import HomeTab from "@/templates/Home";
 
+import { cleanLocalStorage } from "@/utils/rsa";
+
 import { useAppDispatch, useAppSelector } from "@/store/store";
+import { setUser, setIsAuthenticated } from "@/store/features/authSlice";
 
 enum Tabs {
   TRANSACTION = 0,
@@ -28,7 +31,9 @@ export default function Home() {
 
   const dispatch = useAppDispatch();
 
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated, isAuthenticating } = useAppSelector(
+    (state) => state.auth
+  );
 
   function MainContent() {
     switch (selectedTab) {
@@ -42,8 +47,16 @@ export default function Home() {
   }
 
   function handleLogout() {
-    router.push("/");
+    dispatch(setUser(undefined));
+    dispatch(setIsAuthenticated(false));
+    cleanLocalStorage("user");
   }
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="flex flex-1 flex-row h-lvh">

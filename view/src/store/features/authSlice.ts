@@ -31,8 +31,8 @@ export const login = createAsyncThunk(
 
 export const signup = createAsyncThunk(
   "auth/signup",
-  async (user: ReqUserSignup, thunkAPI) => {
-    return await post("/signup", JSON.stringify(user));
+  async (payload: AuthReq, thunkAPI) => {
+    return await post("/signup", JSON.stringify(payload));
   }
 );
 
@@ -46,7 +46,7 @@ export const AuthSlice = createSlice({
     setIsAuthenticating: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticating = action.payload;
     },
-    setUser: (state, action: PayloadAction<LoggedUser>) => {
+    setUser: (state, action: PayloadAction<LoggedUser | undefined>) => {
       state.user = action.payload;
     },
   },

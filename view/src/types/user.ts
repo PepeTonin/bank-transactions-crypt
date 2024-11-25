@@ -16,3 +16,10 @@ export interface ReqUserLogin {
   email: string;
   password: string;
 }
+
+export interface ReqUserSignup {
+  name: string;
+  email: string;
+  cpf: string;
+  password: string;
+}

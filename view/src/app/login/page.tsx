@@ -13,30 +13,40 @@ import { login } from "@/store/features/authSlice";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const [isEmailInputTouched, setIsEmailInputTouched] = useState(false);
   const [password, setPassword] = useState("");
+  const [isPasswordInputTouched, setIsPasswordInputTouched] = useState(false);
 
   const router = useRouter();
-  
+
   const dispatch = useAppDispatch();
 
   const { sessionId, sessionKey } = useAppSelector((state) => state.session);
+
   const { isAuthenticated, isAuthenticating, user } = useAppSelector(
     (state) => state.auth
   );
 
   function handleLogin() {
+    if (!email || !password) {
+      return;
+    }
     if (!sessionId || !sessionKey) return;
     const userInputs: ReqUserLogin = {
       email,
       password,
     };
     const cipherObj = encryptAes(JSON.stringify(userInputs), sessionKey);
-    const payload = {
+    const loginReq = {
       data: cipherObj.cipher,
       iv: cipherObj.iv,
       sessionId,
     };
-    dispatch(login(payload));
+    dispatch(login(loginReq));
+  }
+
+  function handleBack() {
+    router.back();
   }
 
   useEffect(() => {
@@ -45,13 +55,9 @@ export default function Login() {
     }
   }, [isAuthenticated]);
 
-  function handleBack() {
-    router.back();
-  }
-
   return (
     <div className="flex flex-1 flex-col justify-center items-center h-lvh font-roboto">
-      <Card className="p-4 gap-4 w-[400px]">
+      <Card className="p-4 gap-2 w-[400px]">
         <div className="flex flex-row flex-1">
           <ArrowLeft01Icon
             onClick={handleBack}
@@ -65,6 +71,10 @@ export default function Login() {
           placeholder="email@exemplo.com"
           value={email}
           onValueChange={setEmail}
+          errorMessage={!email && "E-mail é obrigatório"}
+          isInvalid={!email && isEmailInputTouched}
+          onFocus={() => setIsEmailInputTouched(false)}
+          onBlur={() => setIsEmailInputTouched(true)}
         />
         <Input
           type="password"
@@ -72,13 +82,20 @@ export default function Login() {
           placeholder="********"
           value={password}
           onValueChange={setPassword}
+          errorMessage={!password && "Senha é obrigatória"}
+          isInvalid={!password && isPasswordInputTouched}
+          onFocus={() => {
+            setIsPasswordInputTouched(false);
+          }}
+          onBlur={() => {
+            setIsPasswordInputTouched(true);
+          }}
         />
         <Button
           className="font-bold tracking-wider"
           color="primary"
           variant="solid"
           onClick={handleLogin}
-          disabled={isAuthenticating}
           isLoading={isAuthenticating}
         >
           Login
