@@ -4,12 +4,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from db.service import initDb
 
-from schemas.requests import GetPublicKey, SignedTransaction, InitSession, AuthRequest
+from schemas.requests import (
+    GetPublicKey,
+    SignedTransaction,
+    InitSession,
+    AuthRequest,
+)
 
 from utils.rsa import storeUserPublicKeyPem, storeSessionPublicKeyPem
 from utils.aes import useDecryptAes
 from utils.session import getSessionKey, loadSessionKey
 from utils.transaction import executeTransaction
+from utils.auth import tryUserLogin, tryUserSignup
 
 app = FastAPI()
 
@@ -66,28 +72,14 @@ def doLogin(request: AuthRequest):
     sessionId = request.sessionId
     sessionKey = loadSessionKey(sessionId)
     decryptedData = useDecryptAes(data, iv, sessionKey)
-
-    # decryptedData = payload json com os dados do usuario para tentativa de login
-
-    # buscar o usuario no banco -> trazer email e senha
-
-    # fazer a hash na senha que o usuario deu de entrada
-
-    # verificar se as senhas batem (acho que tem função pronta pra isso)
-
-    # recusar ou autorizar o login
-
-    # caso autorizado -> retornar o usuario completo
-
-    return JSONResponse(
-        content={
-            "name": "teste",
-            "cpf": "12345678901",
-            "email": "email@email.com",
-            "balance": 0,
-        },
-        status_code=200,
-    )
+    user = tryUserLogin(decryptedData)
+    if user is None:
+        return JSONResponse(content={"message": "unauthorized"}, status_code=401)
+    else:
+        return JSONResponse(
+            content=user,
+            status_code=200,
+        )
 
 
 @app.post("/signup")
@@ -97,25 +89,10 @@ def doSignup(request: AuthRequest):
     sessionId = request.sessionId
     sessionKey = loadSessionKey(sessionId)
     decryptedData = useDecryptAes(data, iv, sessionKey)
-
-    # decryptedData = payload json com os dados do usuario criado 
-
-    # organizar os dados de entrada do usuario
-
-    # aplicar hash argon2 na senha do usuário
-
-    # armazenar tudo no banco
-
-    # autorizar a entrada do usuario
-
-    # retonar o usuario completo
-
-    return JSONResponse(
-        content={
-            "name": "teste",
-            "cpf": "12345678901",
-            "email": "email@email.com",
-            "balance": 0,
-        },
-        status_code=200,
-    )
+    newUser = tryUserSignup(decryptedData)
+    if newUser is None:
+        return JSONResponse(
+            content={"message": "credentials already in use"}, status_code=409
+        )
+    else:
+        return JSONResponse(content=newUser, status_code=200)

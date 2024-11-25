@@ -14,8 +14,6 @@ import {
 import FazerTransacao from "@/templates/FazerTransacao";
 import HomeTab from "@/templates/Home";
 
-import { cleanLocalStorage } from "@/utils/rsa";
-
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { setUser, setIsAuthenticated } from "@/store/features/authSlice";
 
@@ -49,7 +47,6 @@ export default function Home() {
   function handleLogout() {
     dispatch(setUser(undefined));
     dispatch(setIsAuthenticated(false));
-    cleanLocalStorage("user");
   }
 
   useEffect(() => {

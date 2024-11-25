@@ -23,7 +23,7 @@ def verifySign(signedTransaction: SignedTransaction):
 
     senderCpf = transaction_dict["sender"]
 
-    publicKeyPath = f"keys/public_{senderCpf}.pem"
+    publicKeyPath = f"keys/users/public_{senderCpf}.pem"
     publicKey = loadPulicKeyPem(publicKeyPath)
 
     # Configuração do preenchimento PSS para verificação da assinatura digital.

@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Input, Button } from "@nextui-org/react";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  Card,
+  Input,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/react";
 
 import {
   generateAndSaveKeysInLocalStorage,
@@ -10,7 +21,7 @@ import {
 } from "@/utils/rsa";
 import { sendTransaction } from "@/utils/transaction";
 
-const CPF_SENDER = "12345678901";
+import { useAppSelector } from "@/store/store";
 
 export default function FazerTransacao() {
   const [recipient, setRecipient] = useState("");
@@ -19,15 +30,22 @@ export default function FazerTransacao() {
   const [amount, setAmount] = useState("");
   const [isAmountInvalid, setIsAmountInvalid] = useState(false);
 
-  useEffect(() => {
-    const privateKey = getPrivateKeyFromLocalStorage("user");
-    if (!privateKey) {
-      generateAndSaveKeysInLocalStorage("user");
-    }
-    sendUserPublicKeyToServer(CPF_SENDER);
-  }, []);
+  const [isDoingTransaction, setIsDoingTransaction] = useState(false);
 
-  async function handleTransfer() {
+  const { user } = useAppSelector((state) => state.auth);
+
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+
+  useEffect(() => {
+    if (!user) return;
+    const privateKey = getPrivateKeyFromLocalStorage("user", user?.cpf);
+    if (!privateKey) {
+      generateAndSaveKeysInLocalStorage("user", user.cpf);
+    }
+    sendUserPublicKeyToServer(user?.cpf);
+  }, [user]);
+
+  function openConfirmModal() {
     if (!recipient || recipient.length !== 11) {
       setIsRecipientInvalid(true);
       return;
@@ -36,14 +54,30 @@ export default function FazerTransacao() {
       setIsAmountInvalid(true);
       return;
     }
+    if (!user) return;
+    onOpen();
+  }
+
+  async function handleTransfer() {
+    onClose();
+    if (!user) {
+      toast.error("Problema ao executar a transação!");
+      return;
+    }
+    setIsDoingTransaction(true);
     const transaction = {
-      sender: CPF_SENDER,
+      sender: user?.cpf,
       recipient,
       amount: parseFloat(amount),
       date: new Date().toISOString(),
     };
     const response = await sendTransaction(transaction);
-    console.log("response: ", response);
+    setIsDoingTransaction(false);
+    setRecipient("");
+    setAmount("");
+    if (response.message === "transaction executed") {
+      toast.success("Transação executada com sucesso!");
+    }
   }
 
   return (
@@ -79,11 +113,40 @@ export default function FazerTransacao() {
           className="font-bold tracking-wider"
           color="primary"
           variant="solid"
-          onClick={handleTransfer}
+          onClick={openConfirmModal}
+          isLoading={isDoingTransaction}
         >
           Enviar
         </Button>
       </Card>
+      <Toaster />
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Confirmar transação?
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  CPF do destinatário: <span className="font-bold">{recipient}</span>
+                </p>
+                <p>
+                  Valor: <span className="font-bold">R$ {amount}</span>
+                </p>
+              </ModalBody>
+              <ModalFooter className="">
+                <Button color="primary" onPress={handleTransfer} className="flex-1">
+                  Confirmar
+                </Button>
+                <Button color="danger" onPress={onClose} className="flex-1">
+                  Cancelar
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { signData, verifySign } from "@/utils/rsa";
+import { signData } from "@/utils/rsa";
 import { post } from "./api";
 
 export interface Transaction {
@@ -19,7 +19,7 @@ interface PayloadTransaction {
 }
 
 function signTransaction(transaction: Transaction) {
-  const sign = signData(JSON.stringify(transaction));
+  const sign = signData(JSON.stringify(transaction), transaction.sender);
   const signedTransaction: SignedTransaction = { transaction, sign };
   return signedTransaction;
 }

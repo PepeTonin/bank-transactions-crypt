@@ -7,7 +7,10 @@ import { Card, Button } from "@nextui-org/react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { initSession } from "@/store/features/sessionSlice";
 
-import { cleanLocalStorage, generateAndSaveKeysInLocalStorage } from "@/utils/rsa";
+import {
+  cleanSessionKeysFromLocalStorage,
+  generateAndSaveKeysInLocalStorage,
+} from "@/utils/rsa";
 import { getSessionPublicKey } from "@/utils/session";
 
 export default function Root() {
@@ -19,7 +22,7 @@ export default function Root() {
 
   useEffect(() => {
     if (!sessionId) {
-      cleanLocalStorage("session");
+      cleanSessionKeysFromLocalStorage();
       generateAndSaveKeysInLocalStorage("session");
       const publicKey = getSessionPublicKey();
       const newSessionId =

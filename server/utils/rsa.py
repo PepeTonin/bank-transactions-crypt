@@ -34,7 +34,7 @@ def encryptRsaPublicKey(message: bytes, publicKeyPath):
     loadedPublicKey = loadPulicKeyPem(publicKeyPath)
 
     padding_config = padding.PKCS1v15()
-    
+
     cipherMessage = loadedPublicKey.encrypt(
         plaintext=message,
         padding=padding_config,
