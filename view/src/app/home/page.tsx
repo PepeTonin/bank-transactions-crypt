@@ -11,38 +11,33 @@ import {
   Logout03Icon,
 } from "hugeicons-react";
 
-import FazerTransacao from "@/templates/FazerTransacao";
-import HomeTab from "@/templates/Home";
+import MakeTransaction from "./MakeTransaction";
+import HomeTab from "./Home";
+import TransactionsHistory from "./TransactionsHistory";
 
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { setUser, setIsAuthenticated } from "@/store/features/authSlice";
 
 enum Tabs {
-  TRANSACTION = 0,
-  TRANSACTION_HISTORY = 1,
+  HOME,
+  TRANSACTION,
+  TRANSACTION_HISTORY,
 }
 
 export default function Home() {
-  const [selectedTab, setSelectedTab] = useState(-1);
+  const [selectedTab, setSelectedTab] = useState(Tabs.HOME);
 
   const router = useRouter();
 
   const dispatch = useAppDispatch();
 
-  const { user, isAuthenticated, isAuthenticating } = useAppSelector(
-    (state) => state.auth
-  );
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  function MainContent() {
-    switch (selectedTab) {
-      case Tabs.TRANSACTION:
-        return <FazerTransacao />;
-      case Tabs.TRANSACTION_HISTORY:
-        return <></>;
-      default:
-        return <HomeTab />;
-    }
-  }
+  const MainContent = {
+    [Tabs.HOME]: <HomeTab />,
+    [Tabs.TRANSACTION]: <MakeTransaction />,
+    [Tabs.TRANSACTION_HISTORY]: <TransactionsHistory />,
+  };
 
   function handleLogout() {
     dispatch(setUser(undefined));
@@ -62,7 +57,7 @@ export default function Home() {
           <Home09Icon
             size={42}
             className="text-neutral-600 cursor-pointer hover:opacity-80 transition-transform-opacity hover:scale-105"
-            onClick={() => setSelectedTab(-1)}
+            onClick={() => setSelectedTab(Tabs.HOME)}
           />
           <MoneySendSquareIcon
             size={42}
@@ -95,9 +90,7 @@ export default function Home() {
           </Popover>
         </div>
       </aside>
-      <main className="flex-1">
-        <MainContent />
-      </main>
+      <main className="flex-1">{MainContent[selectedTab]}</main>
     </div>
   );
 }

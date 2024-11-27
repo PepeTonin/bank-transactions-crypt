@@ -23,7 +23,7 @@ import { sendTransaction } from "@/utils/transaction";
 
 import { useAppSelector } from "@/store/store";
 
-export default function FazerTransacao() {
+export default function MakeTransaction() {
   const [recipient, setRecipient] = useState("");
   const [isRecipientInvalid, setIsRecipientInvalid] = useState(false);
 

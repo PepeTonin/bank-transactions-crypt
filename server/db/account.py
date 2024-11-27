@@ -20,7 +20,7 @@ def getUserByCpf(cpf: str):
     result = cursor.fetchone()
     cursor.close()
     connection.close()
-    if result:
+    if result is not None:
         return {
             "id": result[0],
             "name": result[1],
@@ -28,6 +28,7 @@ def getUserByCpf(cpf: str):
             "cpf": result[3],
             "balance": result[4],
         }
+    return None
 
 
 def updateUserBalance(cpf: str, amount: float):

@@ -38,7 +38,7 @@ def initDb():
     CREATE TABLE IF NOT EXISTS transactions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         cpf_sender VARCHAR(11) NOT NULL,
-        cpf_recipient VARCHAR(11) NOT NULL,
+        cpf_recipient VARCHAR(11),
         amount DECIMAL(10, 2) NOT NULL,
         event_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         status ENUM('validada', 'saldo insuficiente', 'assinatura invalida', 'destinatario invalido', 'erro nao mapeado') NOT NULL,
